@@ -1,36 +1,37 @@
-/*
-Copyright 2018 Jack Humbert <jack.humb@gmail.com>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/* Copyright 2020 ZSA Technology Labs, Inc <@zsa>
+ * Copyright 2020 Jack Humbert <jack.humb@gmail.com>
+ * Copyright 2020 Christopher Courtney, aka Drashna Jael're  (@drashna) <drashna@live.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+
 
 #include "moonlander.h"
 #ifdef WEBUSB_ENABLE
-#include "webusb.h"
+#    include "webusb.h"
 #endif
 
 keyboard_config_t keyboard_config;
 
 bool mcp23018_leds[3] = {0, 0, 0};
-bool is_launching = false;
+bool is_launching     = false;
 
 #ifdef DYNAMIC_MACRO_ENABLE
 static bool is_dynamic_recording = false;
 
-void dynamic_macro_record_start_user(void) {
-    is_dynamic_recording = true;
-}
+void dynamic_macro_record_start_user(void) { is_dynamic_recording = true; }
 
 void dynamic_macro_record_end_user(int8_t direction) {
     is_dynamic_recording = false;
@@ -128,20 +129,6 @@ void moonlander_led_task(void) {
         wait_ms(150);
     }
 #endif
-#ifdef CAPS_LOCK_STATUS
-    else {
-        led_t led_state = host_keyboard_led_state();
-        if(led_state.caps_lock) {
-            ML_LED_6(true);
-        }
-        else {
-            uint8_t layer = get_highest_layer(layer_state);
-            if(layer != 1) {
-                ML_LED_6(false);
-            }
-        }
-    }
-#endif
 }
 
 static THD_WORKING_AREA(waLEDThread, 128);
@@ -153,7 +140,6 @@ static THD_FUNCTION(LEDThread, arg) {
     }
 }
 
-
 void keyboard_pre_init_kb(void) {
     setPinOutput(B5);
     setPinOutput(B4);
@@ -163,8 +149,7 @@ void keyboard_pre_init_kb(void) {
     writePinLow(B4);
     writePinLow(B3);
 
-
-    chThdCreateStatic(waLEDThread, sizeof(waLEDThread), NORMALPRIO-16, LEDThread, NULL);
+    chThdCreateStatic(waLEDThread, sizeof(waLEDThread), NORMALPRIO - 16, LEDThread, NULL);
 
     /* the array is initialized to 0, no need to re-set it here */
     // mcp23018_leds[0] = 0;  // blue
@@ -176,7 +161,7 @@ void keyboard_pre_init_kb(void) {
 
 #if !defined(MOONLANDER_USER_LEDS)
 layer_state_t layer_state_set_kb(layer_state_t state) {
-    state         = layer_state_set_user(state);
+    state = layer_state_set_user(state);
     if (is_launching || !keyboard_config.led_level) return state;
 
     ML_LED_1(false);
@@ -198,7 +183,6 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
             break;
         case 3:
             ML_LED_3(1);
-            ML_LED_6(1);
             break;
         case 4:
             ML_LED_4(1);
@@ -219,7 +203,7 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
 
 #ifdef RGB_MATRIX_ENABLE
 // clang-format off
-const is31_led g_is31_leds[DRIVER_LED_TOTAL] = {
+const is31_led __flash g_is31_leds[DRIVER_LED_TOTAL] = {
 /* Refer to IS31 manual for these locations
  *   driver
  *   |  R location
@@ -356,15 +340,6 @@ led_config_t g_led_config = { {
 } };
 // clang-format on
 
-void suspend_power_down_kb(void) {
-    rgb_matrix_set_suspend_state(true);
-    suspend_power_down_user();
-}
-
- void suspend_wakeup_init_kb(void) {
-    rgb_matrix_set_suspend_state(false);
-    suspend_wakeup_init_user();
-}
 #endif
 
 #ifdef AUDIO_ENABLE
@@ -386,7 +361,7 @@ bool music_mask_kb(uint16_t keycode) {
 #ifdef SWAP_HANDS_ENABLE
 // swap-hands action needs a matrix to define the swap
 // clang-format off
-const keypos_t hand_swap_config[MATRIX_ROWS][MATRIX_COLS] = {
+const keypos_t PROGMEM hand_swap_config[MATRIX_ROWS][MATRIX_COLS] = {
     /* Left hand, matrix positions */
     {{6,6}, {5,6}, {4,6}, {3,6}, {2,6}, {1,6},{0,6}},
     {{6,7}, {5,7}, {4,7}, {3,7}, {2,7}, {1,7},{0,7}},
@@ -413,21 +388,19 @@ void keyboard_post_init_kb(void) {
 #if defined(AUDIO_ENABLE) && defined(MUSIC_MAP)
 // clang-format off
 const uint8_t music_map[MATRIX_ROWS][MATRIX_COLS] = LAYOUT_moonlander(
-    58, 59, 60, 61, 62, 63, 66, 67, 68, 69, 70, 71,
-    44, 45, 46, 47, 48, 49, 52, 53, 54, 55, 56, 57,
-    30, 31, 32, 33, 34, 35, 38, 39, 40, 41, 42, 43,
-    21, 22, 23,            24, 25, 26
+    58, 59, 60, 61, 62, 63, 64,    65, 66, 67, 68, 69, 70, 71,
+    44, 45, 46, 47, 48, 49, 50,    51, 52, 53, 54, 55, 56, 57,
+    30, 31, 32, 33, 34, 35, 36,    37, 38, 39, 40, 41, 42
 );
 // clang-format on
 #endif
 
-
+#ifdef ORYX_CONFIGURATOR
 bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
 #ifdef WEBUSB_ENABLE
         case WEBUSB_PAIR:
-            if (!record->event.pressed && !webusb_state.pairing)
-                layer_state_set_kb(layer_state);
+            if (!record->event.pressed && !webusb_state.pairing) layer_state_set_kb(layer_state);
             break;
 #endif
 #if !defined(MOONLANDER_USER_LEDS)
@@ -452,33 +425,32 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         case TOGGLE_LAYER_COLOR:
             if (record->event.pressed) {
                 keyboard_config.disable_layer_led ^= 1;
-              if (keyboard_config.disable_layer_led)
-                    rgb_matrix_set_color_all(0, 0, 0);
+                if (keyboard_config.disable_layer_led) rgb_matrix_set_color_all(0, 0, 0);
                 eeconfig_update_kb(keyboard_config.raw);
             }
             break;
         case RGB_TOG:
             if (record->event.pressed) {
-              switch (rgb_matrix_get_flags()) {
-                case LED_FLAG_ALL: {
-                    rgb_matrix_set_flags(LED_FLAG_NONE);
-                    keyboard_config.rgb_matrix_enable = false;
-                    rgb_matrix_set_color_all(0, 0, 0);
-                  }
-                  break;
-                default: {
-                    rgb_matrix_set_flags(LED_FLAG_ALL);
-                    keyboard_config.rgb_matrix_enable = true;
-                  }
-                  break;
-              }
-              eeconfig_update_kb(keyboard_config.raw);
+                switch (rgb_matrix_get_flags()) {
+                    case LED_FLAG_ALL: {
+                        rgb_matrix_set_flags(LED_FLAG_NONE);
+                        keyboard_config.rgb_matrix_enable = false;
+                        rgb_matrix_set_color_all(0, 0, 0);
+                    } break;
+                    default: {
+                        rgb_matrix_set_flags(LED_FLAG_ALL);
+                        keyboard_config.rgb_matrix_enable = true;
+                    } break;
+                }
+                eeconfig_update_kb(keyboard_config.raw);
             }
             return false;
 #endif
     }
     return process_record_user(keycode, record);
 }
+
+#endif
 
 void matrix_init_kb(void) {
     keyboard_config.raw = eeconfig_read_kb();
@@ -488,7 +460,6 @@ void matrix_init_kb(void) {
         keyboard_config.led_level_res = 0b11;
         eeconfig_update_kb(keyboard_config.raw);
     }
-
 #ifdef RGB_MATRIX_ENABLE
     if (keyboard_config.rgb_matrix_enable) {
         rgb_matrix_set_flags(LED_FLAG_ALL);
